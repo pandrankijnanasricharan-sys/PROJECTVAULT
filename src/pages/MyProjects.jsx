@@ -1,0 +1,8 @@
+import { useEffect,useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Plus, FolderKanban } from 'lucide-react';
+import { api } from '../api.js';
+import { useAuth } from '../context/AuthContext.jsx';
+import ProjectCard from '../components/ProjectCard.jsx';
+import { Empty,ErrorMessage,Loading } from '../components/States.jsx';
+export default function MyProjects({savedOnly=false}){const {user}=useAuth();const [projects,setProjects]=useState([]);const [loading,setLoading]=useState(true);const [error,setError]=useState('');useEffect(()=>{api(savedOnly?'/projects/saved':`/projects?owner=${user?.id||user?._id}`).then(d=>setProjects(d.projects)).catch(e=>setError(e.message)).finally(()=>setLoading(false));},[savedOnly,user]);return <div className="page-wrap"><div className="page-heading"><div><div className="eyebrow eyebrow-dark"><FolderKanban size={14}/> YOUR WORKSPACE</div><h1>{savedOnly?'Saved for later.':<>Your projects, <span className="serif-accent">your story.</span></>}</h1><p>{savedOnly?'Ideas you bookmarked to revisit when the time is right.':'Keep your portfolio growing, one experiment at a time.'}</p></div>{!savedOnly&&<Link className="button" to="/new"><Plus size={17}/> New project</Link>}</div><ErrorMessage message={error}/>{loading?<Loading/>:projects.length?<div className="project-grid">{projects.map(p=><ProjectCard key={p._id} project={p}/>)}</div>:<Empty title={savedOnly?'Your reading list is a blank canvas':'Every portfolio starts somewhere'} text={savedOnly?'Save interesting projects from Explore and they will show up here.':'Publish a project to share your learning and progress with the community.'}/>}</div>}
